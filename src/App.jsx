@@ -8,11 +8,9 @@ function Layout({ children }) {
         <div className="brand">AdSphere</div>
         <nav className="nav-links">
           <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
           <Link to="/platform">Platform</Link>
-          <Link to="/parcelace">ParcelAce</Link>
           <Link to="/impact">Impact</Link>
-          <Link to="/founder">Founder</Link>
+          <Link to="/about">About</Link>
         </nav>
         <Link className="contact-btn" to="/contact">
           Contact
@@ -46,7 +44,7 @@ function HomePage() {
           <Link className="primary-btn" to="/platform">
             Explore Platform
           </Link>
-          <Link className="secondary-btn" to="/parcelace">
+          <Link className="secondary-btn" to="/about">
             Learn About Our Infrastructure
           </Link>
         </div>
@@ -87,37 +85,7 @@ function HomePage() {
           </div>
         </div>
       </section>
-
-      <section className="section">
-        <h2>Integrated Model</h2>
-        <p>
-          AdSphere is designed to connect digital opportunity with real-world execution
-          through ParcelAce Express, its logistics and fulfillment layer.
-        </p>
-      </section>
     </>
-  );
-}
-
-function AboutPage() {
-  return (
-    <section className="section page-section">
-      <h1 className="page-title">About AdSphere</h1>
-      <p className="page-text">
-        AdSphere is an AI-enabled digital commerce infrastructure system designed to
-        reduce barriers to participation for small businesses, independent merchants,
-        and emerging creators.
-      </p>
-      <p className="page-text">
-        Rather than serving as a simple marketplace, AdSphere is intended to function
-        as a broader coordination layer connecting matching, product understanding,
-        workflow organization, and execution.
-      </p>
-      <p className="page-text">
-        Its goal is to make digital commerce more accessible, structured, and practical
-        by reducing friction across discovery, evaluation, collaboration, and fulfillment.
-      </p>
-    </section>
   );
 }
 
@@ -157,21 +125,11 @@ function PlatformPage() {
       <div className="section-block">
         <h2>How It Works</h2>
         <div className="cards">
-          <div className="card">
-            <p>1. Identify product, commerce, or sourcing need</p>
-          </div>
-          <div className="card">
-            <p>2. Match with relevant creators or supply-side opportunities</p>
-          </div>
-          <div className="card">
-            <p>3. Evaluate fit, viability, and next-step feasibility</p>
-          </div>
-          <div className="card">
-            <p>4. Organize structured collaboration workflow</p>
-          </div>
-          <div className="card">
-            <p>5. Connect execution through fulfillment and logistics support</p>
-          </div>
+          <div className="card"><p>1. Identify product, commerce, or sourcing need</p></div>
+          <div className="card"><p>2. Match with relevant creators or supply-side opportunities</p></div>
+          <div className="card"><p>3. Evaluate fit, viability, and next-step feasibility</p></div>
+          <div className="card"><p>4. Organize structured collaboration workflow</p></div>
+          <div className="card"><p>5. Connect execution through fulfillment and logistics support</p></div>
         </div>
       </div>
 
@@ -182,14 +140,14 @@ function PlatformPage() {
             <h3>Small Business Entry</h3>
             <p>
               Support small merchants in entering larger digital marketplaces with
-              lower coordination costs and stronger visibility into execution pathways.
+              lower coordination costs and clearer execution pathways.
             </p>
           </div>
           <div className="card">
             <h3>Creator Commerce</h3>
             <p>
               Help creators connect with product and supply-side opportunities that
-              can support more structured commercial participation.
+              support more structured commercial participation.
             </p>
           </div>
           <div className="card">
@@ -199,45 +157,6 @@ function PlatformPage() {
               participation across more complex commerce settings.
             </p>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ParcelAcePage() {
-  return (
-    <section className="section page-section">
-      <h1 className="page-title">ParcelAce Express</h1>
-      <p className="page-text">
-        ParcelAce Express functions as the execution infrastructure layer of AdSphere.
-        It provides logistics, sorting, fulfillment, and last-mile support that help
-        connect digital coordination to real-world outcomes.
-      </p>
-      <p className="page-text">
-        In the broader AdSphere model, ParcelAce strengthens the system by supplying
-        practical operational follow-through for commerce activity that begins in digital
-        environments.
-      </p>
-
-      <div className="cards">
-        <div className="card">
-          <h3>Sorting & Fulfillment</h3>
-          <p>
-            Support operational execution for commerce-related logistics workflows.
-          </p>
-        </div>
-        <div className="card">
-          <h3>Last-Mile Delivery</h3>
-          <p>
-            Provide the physical execution component needed for end-to-end commerce support.
-          </p>
-        </div>
-        <div className="card">
-          <h3>Execution Infrastructure</h3>
-          <p>
-            Connect digital discovery and coordination to practical fulfillment outcomes.
-          </p>
         </div>
       </div>
     </section>
@@ -286,19 +205,58 @@ function ImpactPage() {
   );
 }
 
-function FounderPage() {
+function AboutPage() {
   return (
     <section className="section page-section section-last">
-      <h1 className="page-title">Founder</h1>
+      <h1 className="page-title">About AdSphere</h1>
+
       <p className="page-text">
-        Wenqian Shao is a digital commerce professional with experience in creator-led
-        e-commerce, product selection, campaign execution, and multi-party coordination.
+        AdSphere is an AI-enabled digital commerce infrastructure system designed to
+        reduce barriers to participation for small businesses, independent merchants,
+        and emerging creators.
       </p>
       <p className="page-text">
-        Her background in digital commerce operations and structured workflow thinking
-        informs AdSphere’s approach to improving access, reducing friction, and supporting
-        more practical market participation.
+        Rather than serving as a simple marketplace, AdSphere is intended to function
+        as a broader coordination layer connecting matching, product understanding,
+        workflow organization, and execution.
       </p>
+
+      <div className="section-block">
+        <h2>ParcelAce Express</h2>
+        <p className="page-text">
+          ParcelAce Express functions as the execution infrastructure layer of AdSphere.
+          It provides logistics, sorting, fulfillment, and last-mile support that help
+          connect digital coordination to real-world outcomes.
+        </p>
+
+        <div className="cards">
+          <div className="card">
+            <h3>Sorting & Fulfillment</h3>
+            <p>Support operational execution for commerce-related logistics workflows.</p>
+          </div>
+          <div className="card">
+            <h3>Last-Mile Delivery</h3>
+            <p>Provide the physical execution component needed for end-to-end commerce support.</p>
+          </div>
+          <div className="card">
+            <h3>Execution Infrastructure</h3>
+            <p>Connect digital discovery and coordination to practical fulfillment outcomes.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="section-block">
+        <h2>Founder</h2>
+        <p className="page-text">
+          Wenqian Shao is a digital commerce professional with experience in creator-led
+          e-commerce, product selection, campaign execution, and multi-party coordination.
+        </p>
+        <p className="page-text">
+          Her background in digital commerce operations and structured workflow thinking
+          informs AdSphere’s approach to improving access, reducing friction, and supporting
+          more practical market participation.
+        </p>
+      </div>
     </section>
   );
 }
@@ -322,11 +280,9 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
         <Route path="/platform" element={<PlatformPage />} />
-        <Route path="/parcelace" element={<ParcelAcePage />} />
         <Route path="/impact" element={<ImpactPage />} />
-        <Route path="/founder" element={<FounderPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </Layout>
