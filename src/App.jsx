@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import Demo from "./pages/Demo";
+import Dashboard from './pages/Dashboard';
 
 function Layout({ children }) {
   return (
@@ -13,6 +14,7 @@ function Layout({ children }) {
           <Link to="/impact">Impact</Link>
           <Link to="/about">About</Link>
           <Link to="/demo">Demo</Link>
+          <Link to="/dashboard">Dashboard</Link>
         </nav>
         <Link className="contact-btn" to="/contact">
           Contact
@@ -287,6 +289,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/demo" element={<Demo />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Layout>
   );
