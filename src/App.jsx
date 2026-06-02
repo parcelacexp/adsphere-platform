@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
+import Demo from "./pages/Demo";
 
 function Layout({ children }) {
   return (
