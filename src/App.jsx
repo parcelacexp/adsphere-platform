@@ -12,6 +12,7 @@ function Layout({ children }) {
           <Link to="/platform">Platform</Link>
           <Link to="/impact">Impact</Link>
           <Link to="/about">About</Link>
+          <Link to="/demo">Demo</Link>
         </nav>
         <Link className="contact-btn" to="/contact">
           Contact
