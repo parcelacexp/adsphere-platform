@@ -281,16 +281,42 @@ function ContactPage() {
 
 export default function App() {
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/platform" element={<PlatformPage />} />
-        <Route path="/impact" element={<ImpactPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/demo" element={<Demo />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </Layout>
+    <div className="site">
+
+      <header className="nav">
+        <div className="brand">AdSphere</div>
+
+        <nav className="nav-links">
+          <Link to="/">Home</Link>
+          <Link to="/platform">Platform</Link>
+          <Link to="/impact">Impact</Link>
+          <Link to="/about">About</Link>
+          <Link to="/demo">Demo</Link>
+          <Link to="/dashboard">Dashboard</Link>
+        </nav>
+
+        <Link className="contact-btn" to="/contact">
+          Contact
+        </Link>
+      </header>
+
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/platform" element={<PlatformPage />} />
+          <Route path="/impact" element={<ImpactPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/contact" element={<ContactPage />} />
+        </Routes>
+      </main>
+
+      <footer className="footer">
+        <p>Contact: parcelacexp@gmail.com</p>
+        <p>© 2026 AdSphere</p>
+      </footer>
+
+    </div>
   );
 }
