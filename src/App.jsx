@@ -285,6 +285,7 @@ export default function App() {
         <Route path="/platform" element={<PlatformPage />} />
         <Route path="/impact" element={<ImpactPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/demo" element={<Demo />} />
         <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </Layout>
