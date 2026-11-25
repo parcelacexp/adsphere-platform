@@ -2,60 +2,153 @@
 import React, { useState } from "react";
 import "./MatchEngine.css";
 
+const STORAGE_KEY = "adsphere_test_records_v2";
+const USER_KEY = "adsphere_anonymous_user_v2";
+
 const CATEGORIES = [
-  "Beauty", "Fashion", "Electronics",
-  "Home & Living", "Food & Beverage",
-  "Pet Supplies", "Sports & Outdoors",
-  "Personal Care", "Other"
+  "Beauty",
+  "Fashion",
+  "Electronics",
+  "Home & Living",
+  "Food & Beverage",
+  "Pet Supplies",
+  "Sports & Outdoors",
+  "Personal Care",
+  "Other"
 ];
 
 const GOALS = [
-  "Market Testing", "Sales Growth",
-  "Brand Awareness", "Product Launch",
+  "Market Testing",
+  "Sales Growth",
+  "Brand Awareness",
+  "Product Launch",
   "Market Expansion"
+];
+
+const USER_TYPES = [
+  "Merchant",
+  "Creator",
+  "Agency",
+  "Supplier"
 ];
 
 const STRATEGIES = {
   "Market Testing":
     "Begin with a controlled creator pilot. Evaluate audience response, product interest and feedback before scaling.",
+
   "Sales Growth":
     "Prioritize conversion-focused product demonstrations. Monitor conversion rate and customer acquisition cost.",
+
   "Brand Awareness":
     "Develop audience-aligned storytelling and short-form content. Track reach, engagement and brand discovery.",
+
   "Product Launch":
     "Coordinate product sampling, creator demonstrations and launch schedules. Evaluate initial customer feedback.",
+
   "Market Expansion":
     "Validate demand in new customer segments. Assess distribution capacity and potential commercial partnerships."
 };
 
 const CATEGORY_ADVICE = {
-  "Beauty": "Prioritize tutorials, product texture and application demonstrations.",
-  "Fashion": "Prioritize styling videos, fit demonstrations and audience alignment.",
-  "Electronics": "Prioritize feature demonstrations and product comparisons.",
-  "Home & Living": "Prioritize practical use cases and lifestyle demonstrations.",
-  "Food & Beverage": "Prioritize preparation, taste and product experience.",
-  "Pet Supplies": "Prioritize practical demonstrations for pet owners.",
-  "Sports & Outdoors": "Prioritize activity-based product demonstrations.",
-  "Personal Care": "Prioritize routine-based educational content.",
-  "Other": "Prioritize clear product demonstrations and audience relevance."
+  "Beauty":
+    "Prioritize tutorials, product texture and application demonstrations.",
+
+  "Fashion":
+    "Prioritize styling videos, fit demonstrations and audience alignment.",
+
+  "Electronics":
+    "Prioritize feature demonstrations and product comparisons.",
+
+  "Home & Living":
+    "Prioritize practical use cases and lifestyle demonstrations.",
+
+  "Food & Beverage":
+    "Prioritize preparation, taste and product experience.",
+
+  "Pet Supplies":
+    "Prioritize practical demonstrations for pet owners.",
+
+  "Sports & Outdoors":
+    "Prioritize activity-based product demonstrations.",
+
+  "Personal Care":
+    "Prioritize routine-based educational content.",
+
+  "Other":
+    "Prioritize clear product demonstrations and audience relevance."
 };
 
-const STORAGE_KEY = "adsphere_test_records_v2";
+const EMPTY_EVALUATION = {
+  relevance: "",
+  ease: "",
+  applicability: "",
+  feedback: "",
+  issues: "",
+  improvements: "",
+  status: ""
+};
+
+function createId() {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return (
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).slice(2)
+  );
+}
+
+function getAnonymousUserId() {
+  try {
+    const existing = localStorage.getItem(USER_KEY);
+
+    if (existing) return existing;
+
+    const id = "AS-" + createId();
+
+    localStorage.setItem(USER_KEY, id);
+
+    return id;
+  } catch {
+    return "AS-" + createId();
+  }
+}
 
 function loadRecords() {
   try {
-    return JSON.parse(
+    const data = JSON.parse(
       localStorage.getItem(STORAGE_KEY) || "[]"
     );
+
+    return Array.isArray(data)
+      ? data.filter(
+          r => r && typeof r === "object"
+        )
+      : [];
   } catch {
     return [];
   }
 }
 
+function currency(value) {
+  return Number(value).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2
+  });
+}
+
 function generateRecommendation(input) {
   const budget = Number(input.budget);
 
-  let tier, range, estimatedCost;
+  let tier;
+  let range;
+  let estimatedCost;
 
   if (budget < 2000) {
     tier = "Nano Influencer";
@@ -79,7 +172,8 @@ function generateRecommendation(input) {
     input.audience.trim().length >= 10 ? 15 : 8;
 
   const score = Math.min(
-    100, 40 + budgetScore + audienceScore
+    100,
+    40 + budgetScore + audienceScore
   );
 
   const creatorBudget = budget * 0.7;
@@ -87,81 +181,98 @@ function generateRecommendation(input) {
   return {
     tier,
     range,
+
     quantity: Math.floor(
       creatorBudget / estimatedCost
     ),
+
     score,
     estimatedCost,
     creatorBudget,
     budgetScore,
     audienceScore,
+
     strategy:
-      STRATEGIES[input.goal] + " " +
+      STRATEGIES[input.goal] +
+      " " +
       CATEGORY_ADVICE[input.category],
+
     logistics:
       budget >= 10000
         ? "Evaluate inventory capacity, fulfillment performance and third-party logistics options before scaling."
         : "Validate inventory availability and shipping readiness during the initial pilot.",
+
     explanation:
-      "Recommendations are based on campaign budget, selected category, audience description and business objective.",
+      "Recommendations are based on campaign budget, selected product category, audience description and business objective.",
+
     modelVersion: "2.0-rule-based"
   };
 }
 
 export default function MatchEngine() {
+  const [userId] = useState(getAnonymousUserId);
+
   const [input, setInput] = useState({
-    userId: "",
     userType: "Merchant",
     location: "",
     category: "",
     budget: "",
     audience: "",
-    goal: "",
-    testType: "External User Test"
+    goal: ""
   });
 
   const [evaluation, setEvaluation] = useState({
-    relevance: "",
-    ease: "",
-    applicability: "",
-    feedback: "",
-    issues: "",
-    improvements: "",
-    status: ""
+    ...EMPTY_EVALUATION
   });
 
   const [result, setResult] = useState(null);
-  const [records, setRecords] = useState(loadRecords);
   const [message, setMessage] = useState("");
   const [consent, setConsent] = useState(false);
 
   function changeInput(e) {
+    const { name, value } = e.target;
+
     setInput(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+
     setResult(null);
     setMessage("");
+    setConsent(false);
+
+    setEvaluation({
+      ...EMPTY_EVALUATION
+    });
   }
 
   function changeEvaluation(e) {
+    const { name, value } = e.target;
+
     setEvaluation(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
   }
 
   function runEngine(e) {
     e.preventDefault();
 
+    const budget = Number(input.budget);
+
     if (
-      !input.category ||
-      !input.goal ||
+      !USER_TYPES.includes(input.userType) ||
+      !input.location.trim() ||
+      !CATEGORIES.includes(input.category) ||
+      !GOALS.includes(input.goal) ||
       !input.audience.trim() ||
-      !Number.isFinite(Number(input.budget)) ||
-      Number(input.budget) <= 0
+      !Number.isFinite(budget) ||
+      budget <= 0
     ) {
-      setMessage("Please enter valid business parameters.");
+      setMessage(
+        "Please complete all required business parameters."
+      );
+
       return;
     }
 
@@ -170,291 +281,351 @@ export default function MatchEngine() {
       generatedAt: new Date().toISOString()
     });
 
+    setEvaluation({
+      ...EMPTY_EVALUATION
+    });
+
+    setConsent(false);
     setMessage("");
   }
 
-  function saveTest(e) {
+  function saveFeedback(e) {
     e.preventDefault();
 
     if (!result || !consent) {
       setMessage(
-        "Generate a recommendation and confirm consent first."
+        "Please generate a recommendation and confirm consent."
       );
+
+      return;
+    }
+
+    const ratings = [
+      evaluation.relevance,
+      evaluation.ease,
+      evaluation.applicability
+    ];
+
+    if (
+      ratings.some(
+        value =>
+          ![1, 2, 3, 4, 5].includes(Number(value))
+      )
+    ) {
+      setMessage(
+        "Please complete all three feedback ratings."
+      );
+
+      return;
+    }
+
+    if (
+      !evaluation.feedback.trim() ||
+      !["Pass", "Partial Pass", "Fail"].includes(
+        evaluation.status
+      )
+    ) {
+      setMessage(
+        "Please complete your feedback and recommendation assessment."
+      );
+
       return;
     }
 
     const record = {
-      recordId: crypto.randomUUID(),
-      testDate: new Date().toISOString(),
-      ...input,
-      ...result,
-      ...evaluation
-    };
+      recordId: createId(),
 
-    const updated = [...records, record];
+      userId,
+
+      testDate: new Date().toISOString(),
+
+      testType: "Unverified User Session",
+
+      ...input,
+
+      ...result,
+
+      ...evaluation,
+
+      consent: true,
+
+      storageSource: "Browser Local Storage"
+    };
 
     try {
+      const records = loadRecords();
+
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(updated)
+        JSON.stringify([...records, record])
       );
-      setRecords(updated);
-      setMessage("Test record saved successfully.");
+
+      setMessage(
+        "Thank you for your feedback. Your response has been saved in this browser."
+      );
+
       setResult(null);
       setConsent(false);
+
       setEvaluation({
-        relevance: "",
-        ease: "",
-        applicability: "",
-        feedback: "",
-        issues: "",
-        improvements: "",
-        status: ""
+        ...EMPTY_EVALUATION
       });
+
     } catch {
-      setMessage("Unable to save. Browser storage may be full.");
+      setMessage(
+        "Unable to save your feedback. Please check your browser storage settings."
+      );
     }
   }
-
-  function exportCSV() {
-    if (!records.length) {
-      setMessage("No test records available.");
-      return;
-    }
-
-    const keys = Object.keys(records[0]);
-
-    const escapeCSV = value => {
-      let text = String(value ?? "");
-      if (/^[=+\-@\t\r\n]/.test(text)) {
-        text = "'" + text;
-      }
-      return '"' + text.replace(/"/g, '""') + '"';
-    };
-
-    const csv = [
-      keys.join(","),
-      ...records.map(record =>
-        keys.map(key => escapeCSV(record[key])).join(",")
-      )
-    ].join("\n");
-
-    const blob = new Blob(
-      ["\uFEFF" + csv],
-      { type: "text/csv;charset=utf-8;" }
-    );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download =
-      "AdSphere_Beta_Test_Records.csv";
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  function average(field) {
-    if (!records.length) return "—";
-
-    return (
-      records.reduce(
-        (sum, record) => sum + Number(record[field]), 0
-      ) / records.length
-    ).toFixed(2);
-  }
-
-  const metrics = [
-    ["Recorded Tests", records.length],
-    ["Recommendation Relevance", average("relevance")],
-    ["Ease of Use", average("ease")],
-    ["Business Applicability", average("applicability")]
-  ];
 
   return (
-    <main className="as-engine">
+    <div className="as-engine">
 
       <header className="as-hero">
+
         <span className="as-eyebrow">
-          ADSPHERE / PRODUCT VALIDATION
+          ADSPHERE / COMMERCE INTELLIGENCE
         </span>
+
         <h1>AdSphere Match Engine</h1>
-        <span className="as-beta">BETA V2.0</span>
+
+        <span className="as-beta">
+          BETA V2.0
+        </span>
+
         <p>
-          Structured commerce recommendations,
-          business decision support and user validation.
+          Intelligent creator recommendations,
+          commerce strategy and business decision support.
         </p>
+
       </header>
 
       <form onSubmit={runEngine}>
 
         <section className="as-panel">
-          <h2>01. User Profile</h2>
+
+          <h2>01. Business Profile</h2>
 
           <div className="as-grid">
 
             <label>
-              Anonymous User ID
-              <input
-                name="userId"
-                value={input.userId}
-                onChange={changeInput}
-                placeholder="Participant ID"
-                required
-              />
-            </label>
+              Business Type
 
-            <label>
-              User Type
               <select
                 name="userType"
                 value={input.userType}
                 onChange={changeInput}
+                required
               >
-                <option>Merchant</option>
-                <option>Creator</option>
-                <option>Agency</option>
-                <option>Supplier</option>
+                {USER_TYPES.map(type => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
               </select>
+
             </label>
 
             <label>
               Business Location
+
               <input
                 name="location"
                 value={input.location}
                 onChange={changeInput}
-                placeholder="City, State"
+                placeholder="e.g. Los Angeles, CA"
                 required
               />
-            </label>
 
-            <label>
-              Test Classification
-              <select
-                name="testType"
-                value={input.testType}
-                onChange={changeInput}
-              >
-                <option>External User Test</option>
-                <option>Internal Functional Test</option>
-                <option>Simulated Test</option>
-              </select>
             </label>
 
           </div>
+
         </section>
 
         <section className="as-panel">
-          <h2>02. Business Parameters</h2>
+
+          <h2>02. Commerce Parameters</h2>
 
           <div className="as-grid">
 
             <label>
               Product Category
+
               <select
                 name="category"
                 value={input.category}
                 onChange={changeInput}
                 required
               >
-                <option value="">Select category</option>
+
+                <option value="">
+                  Select product category
+                </option>
+
                 {CATEGORIES.map(category => (
-                  <option key={category}>
+                  <option
+                    key={category}
+                    value={category}
+                  >
                     {category}
                   </option>
                 ))}
+
               </select>
+
             </label>
 
             <label>
-              Monthly Budget (USD)
+              Monthly Campaign Budget (USD)
+
               <input
                 type="number"
                 name="budget"
                 min="1"
+                step="0.01"
                 value={input.budget}
                 onChange={changeInput}
-                placeholder="5000"
+                placeholder="e.g. 5000"
                 required
               />
+
             </label>
 
             <label>
               Target Audience
+
               <input
                 name="audience"
                 value={input.audience}
                 onChange={changeInput}
-                placeholder="Female, age 25–34"
+                placeholder="e.g. Women aged 25–34"
                 required
               />
+
             </label>
 
             <label>
-              Business Goal
+              Business Objective
+
               <select
                 name="goal"
                 value={input.goal}
                 onChange={changeInput}
                 required
               >
-                <option value="">Select goal</option>
+
+                <option value="">
+                  Select business objective
+                </option>
+
                 {GOALS.map(goal => (
-                  <option key={goal}>{goal}</option>
+                  <option key={goal} value={goal}>
+                    {goal}
+                  </option>
                 ))}
+
               </select>
+
             </label>
 
           </div>
 
-          <button className="as-primary" type="submit">
-            Generate Recommendation →
+          <button
+            className="as-primary"
+            type="submit"
+          >
+            Generate Recommendations →
           </button>
 
         </section>
+
       </form>
 
       {result && (
         <>
+
           <section className="as-panel">
-            <h2>03. Recommendation Results</h2>
+
+            <h2>03. Commerce Recommendations</h2>
+
+            <p className="as-note">
+              A personalized planning overview based on
+              your selected business parameters.
+            </p>
 
             <div className="as-metrics">
 
               <article className="as-metric">
-                <span>Market Readiness Score</span>
-                <strong>{result.score}/100</strong>
-                <div className="as-progress">
-                  <div style={{
-                    width: `${result.score}%`
-                  }} />
-                </div>
-                <small>Experimental heuristic</small>
-              </article>
 
-              <article className="as-metric">
-                <span>Recommended Creator Tier</span>
-                <h3>{result.tier}</h3>
-                <small>{result.range} followers</small>
-              </article>
+                <span>
+                  Market Readiness Score
+                </span>
 
-              <article className="as-metric">
-                <span>Suggested Creator Quantity</span>
-                <strong>{result.quantity}</strong>
-                <small>Budget-based estimate</small>
-              </article>
-
-              <article className="as-metric">
-                <span>Estimated Creator Budget</span>
                 <strong>
-                  ${result.creatorBudget.toLocaleString()}
+                  {result.score}/100
                 </strong>
-                <small>70% planning allocation</small>
+
+                <div className="as-progress">
+
+                  <div
+                    style={{
+                      width: `${result.score}%`
+                    }}
+                  />
+
+                </div>
+
+                <small>
+                  Experimental readiness indicator
+                </small>
+
+              </article>
+
+              <article className="as-metric">
+
+                <span>
+                  Recommended Creator Tier
+                </span>
+
+                <h3>{result.tier}</h3>
+
+                <small>
+                  {result.range} followers
+                </small>
+
+              </article>
+
+              <article className="as-metric">
+
+                <span>
+                  Suggested Creator Quantity
+                </span>
+
+                <strong>
+                  {result.quantity}
+                </strong>
+
+                <small>
+                  Estimated collaboration capacity
+                </small>
+
+              </article>
+
+              <article className="as-metric">
+
+                <span>
+                  Estimated Creator Budget
+                </span>
+
+                <strong>
+                  {currency(result.creatorBudget)}
+                </strong>
+
+                <small>
+                  70% planning allocation
+                </small>
+
               </article>
 
             </div>
@@ -462,115 +633,232 @@ export default function MatchEngine() {
             <div className="as-detail-grid">
 
               <article className="as-detail">
+
                 <h3>Commerce Strategy</h3>
+
                 <p>{result.strategy}</p>
+
               </article>
 
               <article className="as-detail">
+
                 <h3>Fulfillment Readiness</h3>
+
                 <p>{result.logistics}</p>
+
               </article>
 
               <article className="as-detail">
-                <h3>Recommendation Logic</h3>
-                <p>{result.explanation}</p>
+
+                <h3>Budget Allocation</h3>
+
+                <p>
+                  Creator collaboration:
+                  {" "}
+                  {currency(result.creatorBudget)}
+                </p>
+
+                <p>
+                  Remaining campaign budget:
+                  {" "}
+                  {currency(
+                    Number(input.budget) -
+                    result.creatorBudget
+                  )}
+                </p>
+
                 <p>
                   Assumed cost per creator:
-                  ${result.estimatedCost}
+                  {" "}
+                  {currency(result.estimatedCost)}
                 </p>
+
               </article>
 
               <article className="as-detail">
-                <h3>Score Breakdown</h3>
-                <p>Baseline: 40 points</p>
+
+                <h3>Recommendation Logic</h3>
+
+                <p>{result.explanation}</p>
+
                 <p>
-                  Budget: {result.budgetScore}/45
+                  Baseline: 40 points
                 </p>
+
+                <p>
+                  Budget assessment:
+                  {" "}
+                  {result.budgetScore}/45
+                </p>
+
                 <p>
                   Audience description:
-                  {" "}{result.audienceScore}/15
+                  {" "}
+                  {result.audienceScore}/15
                 </p>
+
               </article>
 
             </div>
 
             <p className="as-note">
-              This beta uses experimental rule-based logic.
-              Scores and budget estimates are not validated
-              forecasts or guarantees of commercial success.
+
+              AdSphere Beta currently uses experimental
+              rule-based recommendation logic.
+              Recommendations and estimated budgets are
+              intended for planning purposes and are not
+              validated forecasts or guarantees of
+              commercial performance.
+
             </p>
+
           </section>
 
-          <form onSubmit={saveTest}>
+          <form onSubmit={saveFeedback}>
+
             <section className="as-panel">
-              <h2>04. User Evaluation</h2>
+
+              <h2>04. Recommendation Feedback</h2>
+
               <p className="as-note">
-                Rate your actual experience from 1 (poor)
-                to 5 (excellent).
+                Help improve AdSphere by sharing your
+                experience with these recommendations.
+                Rate each item from 1 (poor) to
+                5 (excellent).
               </p>
 
               <div className="as-grid">
+
                 {[
-                  ["relevance", "Recommendation Relevance"],
-                  ["ease", "Ease of Use"],
-                  ["applicability", "Business Applicability"]
+                  [
+                    "relevance",
+                    "Recommendation Relevance"
+                  ],
+                  [
+                    "ease",
+                    "Ease of Use"
+                  ],
+                  [
+                    "applicability",
+                    "Business Applicability"
+                  ]
                 ].map(([key, label]) => (
+
                   <label key={key}>
+
                     {label}
+
                     <select
                       name={key}
                       value={evaluation[key]}
                       onChange={changeEvaluation}
                       required
                     >
-                      <option value="">Select rating</option>
-                      {[1, 2, 3, 4, 5].map(n => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
-                      ))}
+
+                      <option value="">
+                        Select rating
+                      </option>
+
+                      <option value="1">
+                        1 — Poor
+                      </option>
+
+                      <option value="2">
+                        2 — Fair
+                      </option>
+
+                      <option value="3">
+                        3 — Satisfactory
+                      </option>
+
+                      <option value="4">
+                        4 — Good
+                      </option>
+
+                      <option value="5">
+                        5 — Excellent
+                      </option>
+
                     </select>
+
                   </label>
+
                 ))}
+
+                <label>
+
+                  Recommendation Assessment
+
+                  <select
+                    name="status"
+                    value={evaluation.status}
+                    onChange={changeEvaluation}
+                    required
+                  >
+
+                    <option value="">
+                      Select assessment
+                    </option>
+
+                    <option value="Pass">
+                      Meets my expectations
+                    </option>
+
+                    <option value="Partial Pass">
+                      Partially meets my expectations
+                    </option>
+
+                    <option value="Fail">
+                      Does not meet my expectations
+                    </option>
+
+                  </select>
+
+                </label>
+
               </div>
 
               {[
-                ["feedback", "User Feedback",
-                  "Describe your actual testing experience."],
-                ["issues", "Issues Identified",
-                  "Describe any errors or limitations observed."],
-                ["improvements", "Suggested Improvements",
-                  "What should be improved?"]
+                [
+                  "feedback",
+                  "Overall Experience",
+                  "How useful were these recommendations for your business?"
+                ],
+                [
+                  "issues",
+                  "Limitations or Issues",
+                  "Did you encounter any errors, limitations or unexpected results?"
+                ],
+                [
+                  "improvements",
+                  "Suggestions for Improvement",
+                  "What additional features or improvements would you like to see?"
+                ]
               ].map(([key, label, placeholder]) => (
-                <label className="as-text-field" key={key}>
+
+                <label
+                  className="as-text-field"
+                  key={key}
+                >
+
                   {label}
+
                   <textarea
                     name={key}
                     value={evaluation[key]}
                     onChange={changeEvaluation}
                     placeholder={placeholder}
                     rows="3"
+                    maxLength="2000"
                     required={key === "feedback"}
                   />
+
                 </label>
+
               ))}
 
-              <label>
-                Test Status
-                <select
-                  name="status"
-                  value={evaluation.status}
-                  onChange={changeEvaluation}
-                  required
-                >
-                  <option value="">Select status</option>
-                  <option>Pass</option>
-                  <option>Partial Pass</option>
-                  <option>Fail</option>
-                </select>
-              </label>
-
               <label className="as-consent">
+
                 <input
                   type="checkbox"
                   checked={consent}
@@ -579,94 +867,51 @@ export default function MatchEngine() {
                   }
                   required
                 />
-                I consent to the storage and analysis
-                of this anonymized test record.
+
+                I consent to storing this feedback and
+                recommendation record in my browser for
+                product evaluation. I will not include
+                confidential or personally identifying
+                information in my feedback.
+
               </label>
 
-              <button className="as-primary" type="submit">
-                Submit Test Record
+              <button
+                className="as-primary"
+                type="submit"
+              >
+                Save Feedback →
               </button>
+
             </section>
+
           </form>
+
         </>
       )}
 
       {message && (
-        <p className="as-message" role="status">
+
+        <p
+          className="as-message"
+          role="status"
+        >
           {message}
         </p>
+
       )}
 
-      <section className="as-panel">
-        <h2>05. Testing Analytics</h2>
-        <p className="as-note">
-          Records stored in this browser.
-          Includes all test classifications.
-        </p>
-
-        <div className="as-metrics">
-          {metrics.map(([label, value]) => (
-            <article className="as-metric" key={label}>
-              <span>{label}</span>
-              <strong>{value}</strong>
-            </article>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          className="as-primary"
-          onClick={exportCSV}
-        >
-          Export Test Data (CSV)
-        </button>
-      </section>
-
-      <section className="as-panel">
-        <h2>06. Test History</h2>
-
-        <div className="as-table-wrap">
-          <table className="as-table">
-            <thead>
-              <tr>
-                <th>User ID</th>
-                <th>User Type</th>
-                <th>Test Type</th>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Score</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map(record => (
-                <tr key={record.recordId}>
-                  <td>{record.userId}</td>
-                  <td>{record.userType}</td>
-                  <td>{record.testType}</td>
-                  <td>{record.testDate.slice(0, 10)}</td>
-                  <td>{record.category}</td>
-                  <td>{record.score}/100</td>
-                  <td>{record.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {!records.length && (
-            <p className="as-empty">
-              No test records yet.
-            </p>
-          )}
-        </div>
-      </section>
-
       <footer className="as-footer">
+
         AdSphere Beta V2.0 · Commerce Decision Support
+
         <br />
-        Prototype & User Validation Environment
+
+        Creator Intelligence · Business Strategy ·
+        Fulfillment Planning
+
       </footer>
 
-    </main>
+    </div>
   );
 }
