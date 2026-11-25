@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import Demo from "./pages/MatchEngine";
 import Dashboard from './pages/Dashboard';
+import BetaAnalytics from './pages/BetaAnalytics';
 
 function Layout({ children }) {
   return (
@@ -13,8 +14,8 @@ function Layout({ children }) {
           <Link to="/platform">Platform</Link>
           <Link to="/impact">Impact</Link>
           <Link to="/about">About</Link>
-          <Link to="/demo">Demo</Link>
-          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/demo">Match Engine</Link>
+          <Link to="/dashboard">Intelligence</Link>
         </nav>
         <Link className="contact-btn" to="/contact">
           Contact
@@ -291,8 +292,8 @@ export default function App() {
           <Link to="/platform">Platform</Link>
           <Link to="/impact">Impact</Link>
           <Link to="/about">About</Link>
-          <Link to="/demo">Demo</Link>
-          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/demo">Match Engine</Link>
+          <Link to="/dashboard">Intelligence</Link>
         </nav>
 
         <Link className="contact-btn" to="/contact">
@@ -307,7 +308,7 @@ export default function App() {
           <Route path="/impact" element={<ImpactPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/demo" element={<Demo />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin/beta-analytics" element={<BetaAnalytics />} />
           <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </main>
